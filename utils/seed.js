@@ -1,10 +1,27 @@
 const connection = require("../config/connection");
 const { User, Thought } = require("../models");
-const thoughtData = {
-  thoughtText: "Here's a cool thought...",
-  username: "Ben",
-  // userId: "652f25bcaf53305bb6dba104",
-};
+const thoughtData = [
+  {
+    thoughtText: "Here's a cool thought 1...",
+    username: "lernantino",
+    userId: "5edff358a0fcb779aa7b118b",
+  },
+  {
+    thoughtText: "Here's a cool thought 2...",
+    username: "lernantino",
+    userId: "5edff358a0fcb779aa7b118b",
+  },
+  {
+    thoughtText: "Here's a cool thought 3...",
+    username: "lernantino",
+    userId: "5edff358a0fcb779aa7b118b",
+  },
+  {
+    thoughtText: "Here's a cool thought 4...",
+    username: "lernantino",
+    userId: "5edff358a0fcb779aa7b118b",
+  },
+];
 
 const userData = [
   {
@@ -47,17 +64,18 @@ connection.once("open", async () => {
 
   const userList = await User.insertMany(userData);
 
-  const thought = await Thought.create(thoughtData);
+  const thoughtList = await Thought.insertMany(thoughtData);
 
   // add the thought id to a random user from the user list
-  const randomUser = userList[Math.floor(Math.random() * userList.length)];
-
-  //Update the users thought array
-  randomUser.thoughts.push(thought._id);
+  for (let i = 0; i < thoughtList.length; i++) {
+    const randomUser = userList[Math.floor(Math.random() * userList.length)];
+    //Update the users thought array
+    randomUser.thoughts.push(thoughtList[i]._id);
+  }
 
   //Print Results
   console.log(userList);
-  console.log(thoughtData);
+  console.log(thoughtList);
   console.timeEnd("Seeding Complete");
   process.exit(0);
 });
