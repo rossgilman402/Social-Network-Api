@@ -32,17 +32,17 @@ console.time("seeding");
 connection.once("open", async () => {
   //Delete collections if they exist
   let userCheck = await connection.db
-    .listCollections({ name: "Users" })
+    .listCollections({ name: "users" })
     .toArray();
   if (userCheck.length) {
-    await connection.dropCollection("Users");
+    await connection.dropCollection("users");
   }
 
   let thoughtCheck = await connection.db
-    .listCollections({ name: "Thoughts" })
+    .listCollections({ name: "thoughts" })
     .toArray();
   if (thoughtCheck.length) {
-    await connection.dropCollection("Thoughts");
+    await connection.dropCollection("thoughts");
   }
 
   await User.collection.insertMany(userData);
