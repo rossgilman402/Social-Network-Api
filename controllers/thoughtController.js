@@ -47,4 +47,51 @@ module.exports = {
       return res.status(500).json(err);
     }
   },
+
+  //Put to update the thought
+  async updateThought(req, res) {
+    try {
+      const thought = await Thought.findByIdAndUpdate(
+        req.params.thoughtId,
+        req.body,
+        { new: true }
+      );
+
+      if (!thought) {
+        return res.status(404).json({ message: "Thought not found" });
+      }
+
+      res.json(thought);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  },
+
+  async deleteThought(req, res) {
+    try {
+      const thought = await Thought.findByIdAndRemove(req.params.thoughtId);
+
+      if (!thought) {
+        return res.status(404).json({ message: "Thought not found" });
+      }
+
+      //Remove from user if it is in user list
+      if (thought.user) {
+        const user = await User.findById(thought.user);
+        if (user) {
+          const thoughtIndex = user.thoughts.indexOf(thought._id);
+          if (thoughtIndex !== -1) {
+            user.thoughts.splice(thoughtIndex, 1);
+            await user.save();
+          }
+        }
+      }
+
+      res.json({ message: "Thought successfully deleted" });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  },
 };
