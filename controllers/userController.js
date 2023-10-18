@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongoose").Types;
-const { User } = require("../models");
+const { User, Thought } = require("../models");
 
 module.exports = {
   //Get all users
@@ -18,7 +18,7 @@ module.exports = {
     try {
       const user = await User.findOne({ _id: req.params.userId })
         .select("-__v")
-        .populate("thoughts");
+        .populate({ path: "thoughts", select: "-_v" });
 
       if (!user) {
         return res.status(404).json({ message: "No user with that ID" });
@@ -49,6 +49,7 @@ module.exports = {
         req.body,
         { new: true }
       );
+      //Do I need save?
       res.json(user);
     } catch (err) {
       console.log(err);
@@ -59,14 +60,66 @@ module.exports = {
   //Delete a user
   async deleteUser(req, res) {
     try {
-      const user = await User.findOneAndDelete({ _id: req.params.userId });
+      const user = await User.findOneAndRemove({ _id: req.params.userId });
 
       if (!user) {
         return res.status(404).json({ message: "No user with that ID" });
       }
 
-      //Figure out how to delete reaction or thought?
+      //Delete Thoughts that go with the user
+      await Thought.deleteMany({ user: req.params.userId });
+
       res.json({ message: "Student successfully deleted" });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  },
+
+  //Add new friend
+  async addFriend(req, res) {
+    try {
+      const user = await User.findById(req.params.userId);
+      const friend = await User.findById(req.params.friendId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      if (!friend) {
+        return res.status(404).json({ message: "Friend not found" });
+      }
+
+      if (!user.friends.includes(req.params.friendId)) {
+        user.friends.push(friendId);
+        await user.save();
+      }
+
+      res.json(user);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json(err);
+    }
+  },
+
+  //Delete a friend
+  async deleteFriend(req, res) {
+    try {
+      const user = await User.findById(req.params.userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const friendIndex = user.friends.indexOf(req.params.friendId);
+
+      if (friendIndex === -1) {
+        return res.status(404).json({ message: "Friend not found" });
+      }
+
+      user.friends.splice(friendIndex, 1);
+      await user.save();
+
+      res.json(user);
     } catch (err) {
       console.log(err);
       return res.status(500).json(err);

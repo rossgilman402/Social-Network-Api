@@ -2,8 +2,8 @@ const connection = require("../config/connection");
 const { User, Thought } = require("../models");
 const thoughtData = {
   thoughtText: "Here's a cool thought...",
-  username: "lernantino",
-  userId: "652f25bcaf53305bb6dba104",
+  username: "Ben",
+  // userId: "652f25bcaf53305bb6dba104",
 };
 
 const userData = [
@@ -45,11 +45,19 @@ connection.once("open", async () => {
     await connection.dropCollection("thoughts");
   }
 
-  await User.collection.insertMany(userData);
-  await Thought.collection.insertOne(thoughtData);
+  const userList = await User.insertMany(userData);
 
-  console.table(userData);
-  console.table(thoughtData);
+  const thought = await Thought.create(thoughtData);
+
+  // add the thought id to a random user from the user list
+  const randomUser = userList[Math.floor(Math.random() * userList.length)];
+
+  //Update the users thought array
+  randomUser.thoughts.push(thought._id);
+
+  //Print Results
+  console.log(userList);
+  console.log(thoughtData);
   console.timeEnd("Seeding Complete");
   process.exit(0);
 });
