@@ -71,6 +71,7 @@ connection.once("open", async () => {
     const randomUser = userList[Math.floor(Math.random() * userList.length)];
     //Update the users thought array
     randomUser.thoughts.push(thoughtList[i]._id);
+    await randomUser.save();
   }
 
   //Print Results
